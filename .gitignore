@@ -1,0 +1,11 @@
+# In the future, might make static website
+*.html
+
+# Virtual environment for python
+.venv
+
+# Text files
+*.txt
+
+# VScode settings for this project
+.vscode
