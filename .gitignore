@@ -9,3 +9,8 @@
 
 # VScode settings for this project
 .vscode
+
+*.pdf
+
+# Database
+*.db
