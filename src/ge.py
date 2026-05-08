@@ -1,6 +1,7 @@
 import requests as req
 import json
 
+# GE category names
 CLASS_NAMES = """Writing_and_Information
 Visual_and_Performing_Arts
 Historical_and_Cultural_Studies
@@ -28,6 +29,7 @@ GE_LINKS = [
 ]
 
 
+# Make API request
 def request(page, url):
     return json.loads(
         req.get(
@@ -36,12 +38,10 @@ def request(page, url):
     )
 
 
-file = open("ge.txt", "w")
-
-
-for i in range(len(CLASS_NAMES)):
+# Write to file
+def write(file, url):
     page = 1
-    data = request(page, GE_LINKS[i])
+    data = request(page, url)
     file.write(f"\n{CLASS_NAMES[i]}\n\n")
 
     for course in data["data"]["courses"]:
@@ -60,6 +60,18 @@ for i in range(len(CLASS_NAMES)):
             file.write(f"{course['course']['title']}\n")
             file.write(f"{course['course']['description']}\n")
         page = page + 1
-        data = request(page, GE_LINKS[i])
+        data = request(page, url)
 
-file.close()
+
+if __name__ == "__main__":
+    file = open("ge.txt", "w")
+
+    for i in range(len(CLASS_NAMES)):
+        if type(GE_LINKS[i]) != list:
+            write(file, GE_LINKS[i])
+
+        else:
+            for url in GE_LINKS[i]:
+                write(file, url)
+
+    file.close()

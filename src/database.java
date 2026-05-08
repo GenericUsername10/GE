@@ -9,6 +9,8 @@ import java.util.Scanner;
 
 public class database {
 
+    // Reads file full of info about GE courses
+    // This file was created by the python script
     private static void readFile(Scanner in, Connection conn) {
         String category;
         in.nextLine();
@@ -20,6 +22,7 @@ public class database {
         }
     }
 
+    // Connect to database
     private static Connection connect(String name) {
         Connection conn = null;
         String url = "jdbc:sqlite:" + name;
@@ -46,13 +49,14 @@ public class database {
         return conn;
     }
 
+    // Creates each table and inserts data
     private static void createTable(Scanner in, Connection conn,
             String category) {
         String code, title, desc, prereq, temp = null;
         boolean noPrereqs = false;
         PreparedStatement ps;
         String sql = "CREATE TABLE IF NOT EXISTS " + category
-                + " (CourseCode varchar(15) PRIMARY KEY, Title varchar(25), Description MEDIUMTEXT, Prereqs MEDIUMTEXT)";
+                + " (CourseCode VARCHAR(20) PRIMARY KEY, Title TINYTEXT, Description MEDIUMTEXT, Prereqs MEDIUMTEXT)";
 
         try {
             ps = conn.prepareStatement(sql);
@@ -61,7 +65,6 @@ public class database {
 
         } catch (Exception e) {
             System.out.println(e.getMessage());
-            System.out.println(sql);
             System.exit(0);
         }
 
@@ -71,26 +74,32 @@ public class database {
             desc = in.nextLine();
             prereq = in.nextLine();
 
-            if (!prereq.contains("Prereq") && !prereq.contains("Not open to")) {
+            if (!prereq.contains("Prereq") && !prereq.contains("Not open to")
+                    && !prereq.contains("Concur: ")) {
                 temp = prereq;
                 prereq = null;
                 noPrereqs = true;
             }
 
-            sql = "INSERT INTO " + category + " VALUES ('" + code + "', '"
-                    + title + "', '" + desc + "', '" + prereq + "')";
+            sql = "INSERT INTO " + category + " VALUES (?, ?, ?, ?)";
 
             try {
                 ps = conn.prepareStatement(sql);
+                ps.setString(1, code);
+                ps.setString(2, title);
+                ps.setString(3, desc);
+                ps.setString(4, prereq);
                 ps.execute();
 
             } catch (Exception e) {
-                //System.out.println(e.getMessage());
-                //System.out.println(sql);
-                //System.exit(0);
+                /*
+                 * System.out.println(e.getMessage()); if
+                 * (!e.getMessage().contains("SQLITE_CONSTRAINT_PRIMARYKE")) {
+                 * System.exit(0); }
+                 */
             }
             if (noPrereqs) {
-                if (code.length() > 20) {
+                if (temp.length() > 20) {
                     code = in.nextLine();
                 } else {
                     code = temp;
@@ -103,6 +112,7 @@ public class database {
 
     }
 
+    // Main
     public static void main(String[] args) {
         File file = new File("ge.txt");
         Scanner user = new Scanner(System.in);
