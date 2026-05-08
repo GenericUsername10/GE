@@ -1,6 +1,5 @@
 import requests as req
 import json
-import pprint
 
 CLASS_NAMES = """Writing_and_Information
 Visual_and_Performing_Arts
@@ -38,16 +37,12 @@ def request(page, url):
 
 
 file = open("ge.txt", "w")
-test = open("test.txt", "w")
 
 
 for i in range(len(CLASS_NAMES)):
     page = 1
     data = request(page, GE_LINKS[i])
     file.write(f"\n{CLASS_NAMES[i]}\n\n")
-
-    test.write(pprint.pformat(data, 4))
-    test.write("\n\n\n\n\n")
 
     for course in data["data"]["courses"]:
         file.write(
@@ -62,9 +57,9 @@ for i in range(len(CLASS_NAMES)):
             file.write(
                 f"{course['course']['subject']} {course['course']['catalogNumber']}\n"
             )
+            file.write(f"{course['course']['title']}\n")
             file.write(f"{course['course']['description']}\n")
         page = page + 1
         data = request(page, GE_LINKS[i])
 
 file.close()
-test.close()

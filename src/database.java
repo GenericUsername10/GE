@@ -48,7 +48,7 @@ public class database {
 
     private static void createTable(Scanner in, Connection conn,
             String category) {
-        String code, title, desc, prereq;
+        String code, title, desc, prereq, temp = null;
         boolean noPrereqs = false;
         PreparedStatement ps;
         String sql = "CREATE TABLE IF NOT EXISTS " + category
@@ -71,8 +71,8 @@ public class database {
             desc = in.nextLine();
             prereq = in.nextLine();
 
-            if (!prereq.contains("Prereq")) {
-                code = prereq;
+            if (!prereq.contains("Prereq") && !prereq.contains("Not open to")) {
+                temp = prereq;
                 prereq = null;
                 noPrereqs = true;
             }
@@ -85,11 +85,16 @@ public class database {
                 ps.execute();
 
             } catch (Exception e) {
-                System.out.println(e.getMessage());
-                System.out.println(sql);
+                //System.out.println(e.getMessage());
+                //System.out.println(sql);
                 //System.exit(0);
             }
             if (noPrereqs) {
+                if (code.length() > 20) {
+                    code = in.nextLine();
+                } else {
+                    code = temp;
+                }
                 noPrereqs = false;
                 continue;
             }
