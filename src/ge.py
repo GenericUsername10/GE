@@ -43,10 +43,11 @@ def request(page, url):
 
 
 # Write to file
-def write(file, url):
+def write(file, url, flag):
     page = 1
     data = request(page, url)
-    file.write(f"\n{CLASS_NAMES[i]}\n\n")
+    if flag:
+        file.write(f"\n{CLASS_NAMES[i]}\n\n")
 
     for course in data["data"]["courses"]:
         file.write(
@@ -72,10 +73,12 @@ if __name__ == "__main__":
 
     for i in range(len(CLASS_NAMES)):
         if type(GE_LINKS[i]) != list:
-            write(file, GE_LINKS[i])
+            write(file, GE_LINKS[i], True)
 
         else:
+            flag = True
             for url in GE_LINKS[i]:
-                write(file, url)
+                write(file, url, flag)
+                flag = False
 
     file.close()

@@ -75,7 +75,8 @@ public class database {
             prereq = in.nextLine();
 
             if (!prereq.contains("Prereq") && !prereq.contains("Not open to")
-                    && !prereq.contains("Concur: ")) {
+                    && !prereq.contains("Concur: ")
+                    && !prereq.contains("Au, Sp Sems.")) {
                 temp = prereq;
                 prereq = null;
                 noPrereqs = true;
