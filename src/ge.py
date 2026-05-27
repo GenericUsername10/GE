@@ -8,6 +8,8 @@ Historical_and_Cultural_Studies
 Social_and_Behavioral_Sciences
 Race_Ethnic_and_Gender_Diversity
 Theme_Citizenship_for_a_Diverse_and_Just_World
+Math_And_Quant_Reasoning
+Natural_Sciences
 All_Other_Themes""".split("\n")
 
 # Corresponding links used for API calls
@@ -18,6 +20,8 @@ GE_LINKS = [
     "GEN%20Foundation:%20Social%20and%20Behavioral%20Sciences",
     "GEN%20Foundation:%20Race,%20Ethnicity%20%26%20Gender%20Diversity",
     "GEN%20Theme:%20Citizenship%20for%20a%20Diverse%20%26%20Just%20World",
+    "GEN%20Foundation:%20Math%20%26%20Quant%20Reason%20(or%20Data%20Anyl)",
+    "GEN%20Foundation:%20Natural%20Sciences",
     [
         "GEN%20Theme:%20Health%20and%20Well-being",
         "GEN%20Theme:%20Lived%20Environments",
