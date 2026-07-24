@@ -13,6 +13,9 @@
 # Database
 *.db
 
+# For testing purposes
+temp.py
+
 
 .DS_Store
 *.pdf

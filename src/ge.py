@@ -48,6 +48,7 @@ def write(file, url, flag):
     data = request(page, url)
     if flag:
         file.write(f"\n{CLASS_NAMES[i]}\n\n")
+    print(page)
 
     for course in data["data"]["courses"]:
         file.write(
@@ -56,29 +57,28 @@ def write(file, url, flag):
         file.write(f"{course['course']['title']}\n")
         file.write(f"{course['course']['description']}\n")
 
-    while data["data"]["nextPageLink"] is not None:
+    while int(data["data"]["totalPages"]) > page:
+        page = page + 1
         print(page)
+        data = request(page, url)
         for course in data["data"]["courses"]:
             file.write(
                 f"{course['course']['subject']} {course['course']['catalogNumber']}\n"
             )
             file.write(f"{course['course']['title']}\n")
             file.write(f"{course['course']['description']}\n")
-        page = page + 1
-        data = request(page, url)
 
 
-if __name__ == "__main__":
-    file = open("ge.txt", "w")
+file = open("ge.txt", "w")
 
-    for i in range(len(CLASS_NAMES)):
-        if type(GE_LINKS[i]) != list:
-            write(file, GE_LINKS[i], True)
+for i in range(len(CLASS_NAMES)):
+    if type(GE_LINKS[i]) != list:
+        write(file, GE_LINKS[i], True)
 
-        else:
-            flag = True
-            for url in GE_LINKS[i]:
-                write(file, url, flag)
-                flag = False
+    else:
+        flag = True
+        for url in GE_LINKS[i]:
+            write(file, url, flag)
+            flag = False
 
-    file.close()
+file.close()
