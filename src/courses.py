@@ -518,8 +518,9 @@ def request(page, url):
 
 
 # Write to file
-def write(file, url):
+def write(file, url, i):
     page = 1
+    print(page)
     data = request(page, url)
     file.write(f"\n{NAMES[i]}\n\n")
 
@@ -529,6 +530,25 @@ def write(file, url):
         )
         file.write(f"{course['course'].get('title', 'No Title')}\n")
         file.write(f"{course['course'].get('description', 'No description')}\n")
+
+        for section in course.get("sections"):
+
+            file.write(f"{section["classNumber"]}\n")
+            file.write(f"{section["term"]}\n")
+
+            for meeting in section.get("meetings"):
+                file.write(f"{meeting["meetingNumber"]}\n")
+                file.write(f"{meeting["monday"]}\n")
+                file.write(f"{meeting["tuesday"]}\n")
+                file.write(f"{meeting["wednesday"]}\n")
+                file.write(f"{meeting["thursday"]}\n")
+                file.write(f"{meeting["friday"]}\n")
+                file.write(f"{meeting["saturday"]}\n")
+                file.write(f"{meeting["sunday"]}\n")
+                file.write(f"{meeting["startTime"]}\n")
+                file.write(f"{meeting["endTime"]}\n")
+                file.write(f"{meeting["facilityDescription"]}\n")
+                file.write(f"{meeting["room"]}\n")
 
     while int(data["data"]["totalPages"]) > page:
         page = page + 1
@@ -540,12 +560,30 @@ def write(file, url):
             )
             file.write(f"{course['course'].get('title', 'No Title')}\n")
             file.write(f"{course['course'].get('description', 'No description')}\n")
+            for section in course.get("sections"):
+
+                file.write(f"{section["classNumber"]}\n")
+                file.write(f"{section["term"]}\n")
+
+                for meeting in section.get("meetings"):
+                    file.write(f"{meeting["meetingNumber"]}\n")
+                    file.write(f"{meeting["startTime"]}\n")
+                    file.write(f"{meeting["endTime"]}\n")
+                    file.write(f"{meeting["monday"]}\n")
+                    file.write(f"{meeting["tuesday"]}\n")
+                    file.write(f"{meeting["wednesday"]}\n")
+                    file.write(f"{meeting["thursday"]}\n")
+                    file.write(f"{meeting["friday"]}\n")
+                    file.write(f"{meeting["saturday"]}\n")
+                    file.write(f"{meeting["sunday"]}\n")
+                    file.write(f"{meeting["facilityDescription"]}\n")
+                    file.write(f"{meeting["room"]}\n")
 
 
 file = open("courses.txt", "w")
 
 for i in range(len(NAMES)):
-    write(file, LINKS[i])
+    write(file, LINKS[i], i)
 
 file.close()
 conn.close()
