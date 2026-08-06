@@ -507,6 +507,24 @@ conn = sqlite3.connect("ge.db")
 
 cur = conn.cursor()
 
+cur.execute(
+    f"CREATE TABLE IF NOT EXISTS Courses (CourseCode VARCHAR(20) PRIMARY KEY, Title TINYTEXT, Description MEDIUMTEXT, Type TINYTEXT, Career VARCHAR(40))"
+)
+
+cur.execute(
+    f"CREATE TABLE IF NOT EXISTS Sections (CourseCode VARCHAR(20), ClassNum INT, Semester VARCHAR(20), PRIMARY KEY (CourseCode, ClassNum), FOREIGN KEY (CourseCode) REFERENCES Courses(CourseCode) ON DELETE CASCADE)"
+)
+
+cur.execute(
+    f"CREATE TABLE IF NOT EXISTS Meetings (CourseCode VARCHAR(20), ClassNum INT, MeetingNum INT, Instructor VARCHAR(50), start VARCHAR(20), end VARCHAR(20), Monday BOOL, Tuesday BOOL, Wednesday BOOL, Thursday BOOL, Friday BOOL, Saturday BOOL, Sunday BOOL, PRIMARY KEY (CourseCode, ClassNum, MeetingNum), FOREIGN KEY (CourseCode) REFERENCES Courses(CourseCode), FOREIGN KEY (ClassNum) REFERENCES Sections(ClassNum) ON DELETE CASCADE)"
+)
+
+cur.execute(f"CREATE TABLE IF NOT EXISTS Facilities (Name TINYTEXT PRIMARY KEY)")
+
+cur.execute(
+    f"CREATE TABLE IF NOT EXISTS Rooms (Name TINYTEXT, Number INT, PRIMARY KEY (Name, Number), FOREIGN KEY (Name) REFERENCES Facilities(Name) ON DELETE CASCADE)"
+)
+
 
 # Make API request
 def request(page, url):
@@ -538,6 +556,7 @@ def write(file, url, i):
 
             for meeting in section.get("meetings"):
                 file.write(f"{meeting["meetingNumber"]}\n")
+                file.write(f"{meeting["instructors"][0]['displayName']}\n")
                 file.write(f"{meeting["monday"]}\n")
                 file.write(f"{meeting["tuesday"]}\n")
                 file.write(f"{meeting["wednesday"]}\n")
@@ -547,8 +566,15 @@ def write(file, url, i):
                 file.write(f"{meeting["sunday"]}\n")
                 file.write(f"{meeting["startTime"]}\n")
                 file.write(f"{meeting["endTime"]}\n")
+
+                if (
+                    meeting["facilityDescription"] is None
+                    or meeting["facilityDescription"] == "ONLINE"
+                ):
+                    pass
+
                 file.write(f"{meeting["facilityDescription"]}\n")
-                file.write(f"{meeting["room"]}\n")
+                file.write(f"{meeting["room"]}\n\n")
 
     while int(data["data"]["totalPages"]) > page:
         page = page + 1
@@ -560,6 +586,7 @@ def write(file, url, i):
             )
             file.write(f"{course['course'].get('title', 'No Title')}\n")
             file.write(f"{course['course'].get('description', 'No description')}\n")
+            file.write(f"{course['course'].get('academicCareer', 'N/A')}")
             for section in course.get("sections"):
 
                 file.write(f"{section["classNumber"]}\n")
@@ -567,8 +594,7 @@ def write(file, url, i):
 
                 for meeting in section.get("meetings"):
                     file.write(f"{meeting["meetingNumber"]}\n")
-                    file.write(f"{meeting["startTime"]}\n")
-                    file.write(f"{meeting["endTime"]}\n")
+                    file.write(f"{meeting["instructors"][0]['displayName']}\n")
                     file.write(f"{meeting["monday"]}\n")
                     file.write(f"{meeting["tuesday"]}\n")
                     file.write(f"{meeting["wednesday"]}\n")
@@ -576,8 +602,17 @@ def write(file, url, i):
                     file.write(f"{meeting["friday"]}\n")
                     file.write(f"{meeting["saturday"]}\n")
                     file.write(f"{meeting["sunday"]}\n")
+                    file.write(f"{meeting["startTime"]}\n")
+                    file.write(f"{meeting["endTime"]}\n")
+
+                    if (
+                        meeting["facilityDescription"] is None
+                        or meeting["facilityDescription"] == "ONLINE"
+                    ):
+                        pass
+
                     file.write(f"{meeting["facilityDescription"]}\n")
-                    file.write(f"{meeting["room"]}\n")
+                    file.write(f"{meeting["room"]}\n\n")
 
 
 file = open("courses.txt", "w")
