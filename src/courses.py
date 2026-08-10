@@ -516,7 +516,7 @@ cur.execute(
 )
 
 cur.execute(
-    f"CREATE TABLE IF NOT EXISTS Meetings (CourseCode VARCHAR(20), ClassNum INT, MeetingNum INT, Instructor VARCHAR(50), start VARCHAR(20), end VARCHAR(20), Monday BOOL, Tuesday BOOL, Wednesday BOOL, Thursday BOOL, Friday BOOL, Saturday BOOL, Sunday BOOL, PRIMARY KEY (CourseCode, ClassNum, MeetingNum), FOREIGN KEY (CourseCode) REFERENCES Courses(CourseCode), FOREIGN KEY (ClassNum) REFERENCES Sections(ClassNum) ON DELETE CASCADE)"
+    f"CREATE TABLE IF NOT EXISTS Meetings (CourseCode VARCHAR(20), ClassNum INT, MeetingNum INT, Name TINYTEXT, Number INT, Instructor VARCHAR(50), start VARCHAR(20), end VARCHAR(20), Monday BOOL, Tuesday BOOL, Wednesday BOOL, Thursday BOOL, Friday BOOL, Saturday BOOL, Sunday BOOL, PRIMARY KEY (CourseCode, ClassNum, MeetingNum), FOREIGN KEY (CourseCode) REFERENCES Courses(CourseCode), FOREIGN KEY (ClassNum) REFERENCES Sections(ClassNum), FOREIGN KEY (Name, Number) REFERENCES Rooms(Name, Number) ON DELETE CASCADE)"
 )
 
 cur.execute(f"CREATE TABLE IF NOT EXISTS Facilities (Name TINYTEXT PRIMARY KEY)")
@@ -543,18 +543,48 @@ def write(file, url, i):
     file.write(f"\n{NAMES[i]}\n\n")
 
     for course in data["data"]["courses"]:
+
+        info = (
+            f"{course['course']['subject']} {course['course']['catalogNumber']}",
+            course["course"].get("title", "No Title"),
+            course["course"].get("description", "No description"),
+            NAMES[i],
+            course["course"].get("academicCareer", "N/A"),
+        )
+
+        try:
+            cur.execute("INSERT INTO Courses VALUES (?, ?, ?, ?, ?)", info)
+            conn.commit()
+        except Exception as e:
+            if Exception is sqlite3.IntegrityError:
+                errors.write(f"{e}\n")
+
         file.write(
             f"{course['course']['subject']} {course['course']['catalogNumber']}\n"
         )
         file.write(f"{course['course'].get('title', 'No Title')}\n")
         file.write(f"{course['course'].get('description', 'No description')}\n")
+        file.write(f"{course['course'].get('academicCareer', 'N/A')}")
 
         for section in course.get("sections"):
+
+            info = (
+                f"{course['course']['subject']} {course['course']['catalogNumber']}",
+                section["classNumber"],
+                section["term"],
+            )
+            try:
+                cur.execute("INSERT INTO Sections VALUES (?, ?, ?)", info)
+                conn.commit()
+            except Exception as e:
+                if Exception is sqlite3.IntegrityError:
+                    errors.write(f"{e}\n")
 
             file.write(f"{section["classNumber"]}\n")
             file.write(f"{section["term"]}\n")
 
             for meeting in section.get("meetings"):
+
                 file.write(f"{meeting["meetingNumber"]}\n")
                 file.write(f"{meeting["instructors"][0]['displayName']}\n")
                 file.write(f"{meeting["monday"]}\n")
@@ -567,11 +597,53 @@ def write(file, url, i):
                 file.write(f"{meeting["startTime"]}\n")
                 file.write(f"{meeting["endTime"]}\n")
 
-                if (
+                if not (
                     meeting["facilityDescription"] is None
                     or meeting["facilityDescription"] == "ONLINE"
                 ):
-                    pass
+                    file.write("Online\n")
+                    info = (meeting["facilityDescription"],)
+                    try:
+                        cur.execute("INSERT INTO Facilities VALUES (?)", info)
+                        conn.commit()
+                    except Exception as e:
+                        if Exception is sqlite3.IntegrityError:
+                            errors.write(f"{e}\n")
+
+                    info = (meeting["facilityDescription"], meeting["room"])
+                    try:
+                        cur.execute("INSERT INTO Rooms VALUES (?, ?)", info)
+                        conn.commit()
+                    except Exception as e:
+                        if Exception is sqlite3.IntegrityError:
+                            errors.write(f"{e}\n")
+
+                info = (
+                    f"{course['course']['subject']} {course['course']['catalogNumber']}",
+                    section["classNumber"],
+                    meeting["meetingNumber"],
+                    meeting["facilityDescription"],
+                    meeting["room"],
+                    meeting["instructors"][0]["displayName"],
+                    meeting["startTime"],
+                    meeting["endTime"],
+                    meeting["monday"],
+                    meeting["tuesday"],
+                    meeting["wednesday"],
+                    meeting["thursday"],
+                    meeting["friday"],
+                    meeting["saturday"],
+                    meeting["sunday"],
+                )
+                try:
+                    cur.execute(
+                        "INSERT INTO Meetings VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                        info,
+                    )
+                    conn.commit()
+                except Exception as e:
+                    if Exception is sqlite3.IntegrityError:
+                        errors.write(f"{e}\n")
 
                 file.write(f"{meeting["facilityDescription"]}\n")
                 file.write(f"{meeting["room"]}\n\n")
@@ -581,18 +653,77 @@ def write(file, url, i):
         data = request(page, url)
         print(page)
         for course in data["data"]["courses"]:
+
+            info = (
+                f"{course['course']['subject']} {course['course']['catalogNumber']}",
+                course["course"].get("title", "No Title"),
+                course["course"].get("description", "No description"),
+                NAMES[i],
+                course["course"].get("academicCareer", "N/A"),
+            )
+
+            try:
+                cur.execute("INSERT INTO Courses VALUES (?, ?, ?, ?, ?)", info)
+                conn.commit()
+            except Exception as e:
+                if Exception is sqlite3.IntegrityError:
+                    errors.write(f"{e}\n")
+
             file.write(
                 f"{course['course']['subject']} {course['course']['catalogNumber']}\n"
             )
             file.write(f"{course['course'].get('title', 'No Title')}\n")
             file.write(f"{course['course'].get('description', 'No description')}\n")
             file.write(f"{course['course'].get('academicCareer', 'N/A')}")
+
             for section in course.get("sections"):
+
+                info = (
+                    f"{course['course']['subject']} {course['course']['catalogNumber']}",
+                    section["classNumber"],
+                    section["term"],
+                )
+
+                try:
+                    cur.execute("INSERT INTO Sections VALUES (?, ?, ?)", info)
+                    conn.commit()
+                except Exception as e:
+                    if Exception is sqlite3.IntegrityError:
+                        errors.write(f"{e}\n")
 
                 file.write(f"{section["classNumber"]}\n")
                 file.write(f"{section["term"]}\n")
 
                 for meeting in section.get("meetings"):
+
+                    info = (
+                        f"{course['course']['subject']} {course['course']['catalogNumber']}",
+                        section["classNumber"],
+                        meeting["meetingNumber"],
+                        meeting["facilityDescription"],
+                        meeting["room"],
+                        meeting["instructors"][0]["displayName"],
+                        meeting["startTime"],
+                        meeting["endTime"],
+                        meeting["monday"],
+                        meeting["tuesday"],
+                        meeting["wednesday"],
+                        meeting["thursday"],
+                        meeting["friday"],
+                        meeting["saturday"],
+                        meeting["sunday"],
+                    )
+
+                    try:
+                        cur.execute(
+                            "INSERT INTO Meetings VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                            info,
+                        )
+                        conn.commit()
+                    except Exception as e:
+                        if Exception is sqlite3.IntegrityError:
+                            errors.write(f"{e}\n")
+
                     file.write(f"{meeting["meetingNumber"]}\n")
                     file.write(f"{meeting["instructors"][0]['displayName']}\n")
                     file.write(f"{meeting["monday"]}\n")
@@ -605,17 +736,61 @@ def write(file, url, i):
                     file.write(f"{meeting["startTime"]}\n")
                     file.write(f"{meeting["endTime"]}\n")
 
-                    if (
+                    if not (
                         meeting["facilityDescription"] is None
                         or meeting["facilityDescription"] == "ONLINE"
                     ):
-                        pass
+                        file.write("Online\n")
+                        info = (meeting["facilityDescription"],)
+                        try:
+                            cur.execute("INSERT INTO Facilities VALUES (?)", info)
+                            conn.commit()
+                        except Exception as e:
+                            if Exception is sqlite3.IntegrityError:
+                                errors.write(f"{e}\n")
+
+                        info = (meeting["facilityDescription"], meeting["room"])
+                        try:
+                            cur.execute("INSERT INTO Rooms VALUES (?, ?)", info)
+                            conn.commit()
+                        except Exception as e:
+                            if Exception is sqlite3.IntegrityError:
+                                errors.write(f"{e}\n")
+
+                    info = (
+                        f"{course['course']['subject']} {course['course']['catalogNumber']}",
+                        section["classNumber"],
+                        meeting["facilityDescription"],
+                        meeting["room"],
+                        meeting["meetingNumber"],
+                        meeting["instructors"][0]["displayName"],
+                        meeting["startTime"],
+                        meeting["endTime"],
+                        meeting["monday"],
+                        meeting["tuesday"],
+                        meeting["wednesday"],
+                        meeting["thursday"],
+                        meeting["friday"],
+                        meeting["saturday"],
+                        meeting["sunday"],
+                    )
+
+                    try:
+                        cur.execute(
+                            "INSERT INTO Meetings VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                            info,
+                        )
+                        conn.commit()
+                    except Exception as e:
+                        if Exception is sqlite3.IntegrityError:
+                            errors.write(f"{e}\n")
 
                     file.write(f"{meeting["facilityDescription"]}\n")
                     file.write(f"{meeting["room"]}\n\n")
 
 
 file = open("courses.txt", "w")
+errors = open("errors.txt", "w")
 
 for i in range(len(NAMES)):
     write(file, LINKS[i], i)
