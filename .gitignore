@@ -4,6 +4,9 @@
 # Virtual environment for python
 .venv
 
+# Python compiled
+*.pyc
+
 # Text files
 *.txt
 
@@ -16,6 +19,6 @@
 # For testing purposes
 temp.py
 
-
+# VSCode stuff
 .DS_Store
 *.pdf

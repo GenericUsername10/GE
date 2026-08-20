@@ -516,13 +516,13 @@ cur.execute(
 )
 
 cur.execute(
-    f"CREATE TABLE IF NOT EXISTS Meetings (CourseCode VARCHAR(20), ClassNum INT, MeetingNum INT, Name TINYTEXT, Number INT, Instructor VARCHAR(50), start VARCHAR(20), end VARCHAR(20), Monday BOOL, Tuesday BOOL, Wednesday BOOL, Thursday BOOL, Friday BOOL, Saturday BOOL, Sunday BOOL, PRIMARY KEY (CourseCode, ClassNum, MeetingNum), FOREIGN KEY (CourseCode) REFERENCES Courses(CourseCode), FOREIGN KEY (ClassNum) REFERENCES Sections(ClassNum), FOREIGN KEY (Name, Number) REFERENCES Rooms(Name, Number) ON DELETE CASCADE)"
+    f"CREATE TABLE IF NOT EXISTS Meetings (CourseCode VARCHAR(20), ClassNum INT, MeetingNum INT, Name TINYTEXT, Number INT, Instructor VARCHAR(50), start VARCHAR(20), end VARCHAR(20), Monday BOOL, Tuesday BOOL, Wednesday BOOL, Thursday BOOL, Friday BOOL, Saturday BOOL, Sunday BOOL, PRIMARY KEY (CourseCode, ClassNum, MeetingNum), FOREIGN KEY (CourseCode) REFERENCES Courses(CourseCode), FOREIGN KEY (CourseCode, ClassNum) REFERENCES Sections(CourseCode, ClassNum), FOREIGN KEY (Name, Number) REFERENCES Rooms(Name, Number) ON DELETE CASCADE)"
 )
 
 cur.execute(f"CREATE TABLE IF NOT EXISTS Facilities (Name TINYTEXT PRIMARY KEY)")
 
 cur.execute(
-    f"CREATE TABLE IF NOT EXISTS Rooms (Name TINYTEXT, Number INT, PRIMARY KEY (Name, Number), FOREIGN KEY (Name) REFERENCES Facilities(Name) ON DELETE CASCADE)"
+    f"CREATE TABLE IF NOT EXISTS Rooms (Name TINYTEXT, Number TINYTEXT, PRIMARY KEY (Name, Number), FOREIGN KEY (Name) REFERENCES Facilities(Name) ON DELETE CASCADE)"
 )
 
 
@@ -538,6 +538,7 @@ def request(page, url):
 # Write to file
 def write(file, url, i):
     page = 1
+    print(NAMES[i])
     print(page)
     data = request(page, url)
     file.write(f"\n{NAMES[i]}\n\n")
