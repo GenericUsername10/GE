@@ -502,8 +502,9 @@ NAMES = [
     "ukrain",
 ]
 
+dbname = input("Enter a database name: ")
 
-conn = sqlite3.connect("ge.db")
+conn = sqlite3.connect(dbname)
 
 cur = conn.cursor()
 
@@ -790,6 +791,7 @@ def write(file, url, i):
                     file.write(f"{meeting["room"]}\n\n")
 
 
+# courses.txt and errors.txt are used as debug methods
 file = open("courses.txt", "w")
 errors = open("errors.txt", "w")
 
@@ -798,3 +800,4 @@ for i in range(len(NAMES)):
 
 file.close()
 conn.close()
+errors.close()
